@@ -1,1 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Telegram Mini App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+    <!-- Анимированный фон -->
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <header>
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-robot"></i></div>
+            <h1>Rоblох Emotions</h1>
+        </div>
+        <button class="auth-btn" id="registerBtn">
+            <i class="fab fa-roblox"></i> Войти через Rоblох
+        </button>
+    </header>
+    
+    <div class="container">
+        <section class="hero">
+            <h2>Коллекция <span class="highlight">анимаций</span> Roblox</h2>
+            <p>Просматривайте разнообразные эмоции и анимации из игры Roblox. Для доступа к полной библиотеке необходима регистрация через ваш аккаунт Roblox.</p>
+        </section>
+        
+        <div class="animations-grid">
+            <!-- Анимация 1 -->
+            <div class="animation-card fade-in delay-1">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/3sLfk9A.gif" alt="Wave Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="wave">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                    <div class="card-badge">Популярное</div>
+                </div>
+                <div class="card-content">
+                    <h3>Приветствие</h3>
+                    <p>Анимация приветствия, когда персонаж машет рукой.</p>
+                </div>
+            </div>
+            
+            <!-- Анимация 2 -->
+            <div class="animation-card fade-in delay-2">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/5Z3Q69L.gif" alt="Dance Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="dance">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Танец</h3>
+                    <p>Веселая танцевальная анимация для вашего персонажа.</p>
+                </div>
+            </div>
+            
+            <!-- Анимация 3 -->
+            <div class="animation-card fade-in delay-3">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/7J9gq9G.gif" alt="Laugh Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="laugh">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Смех</h3>
+                    <p>Анимация смеха, когда персонаж веселится.</p>
+                </div>
+            </div>
+            
+            <!-- Анимация 4 -->
+            <div class="animation-card fade-in delay-4">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/9w0qZ9A.gif" alt="Celebrate Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="celebrate">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                    <div class="card-badge">Новое</div>
+                </div>
+                <div class="card-content">
+                    <h3>Празднование</h3>
+                    <p>Анимация празднования победы или успеха.</p>
+                </div>
+            </div>
+            
+            <!-- Анимация 5 -->
+            <div class="animation-card fade-in delay-5">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/2qZ3Q6L.gif" alt="Salute Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="salute">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Салют</h3>
+                    <p>Анимация отдания чести вашим персонажем.</p>
+                </div>
+            </div>
+            
+            <!-- Анимация 6 -->
+            <div class="animation-card fade-in">
+                <div class="card-header">
+                    <img src="https://i.imgur.com/8w0qZ9A.gif" alt="Cry Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="cry">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Плач</h3>
+                    <p>Эмоция грусти, когда персонаж расстроен.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="register-prompt">
+            <h2>Хотите увидеть больше анимаций?</h2>
+            <p>Зарегистрируйтесь через Roblox, чтобы получить доступ к полной коллекции из сотен уникальных эмоций и анимаций для вашего персонажа.</p>
+            <button class="auth-btn" id="promptRegisterBtn">
+                <i class="fab fa-roblox"></i> Зарегистрироваться
+            </button>
+        </div>
+    </div>
+    
+    <div class="modal" id="animationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Название анимации</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-video" id="animationPlayer">
+                    <!-- Здесь будет видео -->
+                </div>
+                <h3>Описание</h3>
+                <p id="animationDescription">Описание анимации появится здесь</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">О нас</a>
+                <a href="#">Правила использования</a>
+                <a href="#">Контакты</a>
+                <a href="#">Поддержка</a>
+            </div>
+            <div class="copyright">
+                © 2023 Roblox Emotions. Все права защищены.
+            </div>
+        </div>
+    </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Создание анимированного фона
+            createAnimatedBackground();
+            
+            const modal = document.getElementById('animationModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const animationDescription = document.getElementById('animationDescription');
+            const animationPlayer = document.getElementById('animationPlayer');
+            const playButtons = document.querySelectorAll('.play-btn');
+            const registerButtons = document.querySelectorAll('#registerBtn, #promptRegisterBtn');
+            
+            // Данные анимаций
+            const animations = {
+                wave: {
+                    title: "Приветствие",
+                    description: "Анимация приветствия, когда персонаж машет рукой. Идеально для встречи с другими игроками. Эта эмоция отлично подходит для приветствия новых друзей в Roblox.",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/wave.mp4"
+                },
+                dance: {
+                    title: "Танец",
+                    description: "Веселая танцевальная анимация для вашего персонажа. Отлично подходит для праздников и вечеринок в Roblox. Покажите свои танцевальные движения!",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/dance.mp4"
+                },
+                laugh: {
+                    title: "Смех",
+                    description: "Анимация смеха, когда персонаж веселится. Покажите свою радость в игре! Отлично подходит для забавных моментов с друзьями.",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/laugh.mp4"
+                },
+                celebrate: {
+                    title: "Празднование",
+                    description: "Анимация празднования победы или успеха. Покажите всем, что вы добились цели! Идеально для завершения сложных заданий.",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/celebrate.mp4"
+                },
+                salute: {
+                    title: "Салют",
+                    description: "Анимация отдания чести вашим персонажем. Проявите уважение к другим игрокам. Часто используется в ролевых играх.",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/salute.mp4"
+                },
+                cry: {
+                    title: "Плач",
+                    description: "Эмоция грусти, когда персонаж расстроен. Выразите свои чувства в игре. Подходит для драматических ситуаций.",
+                    videoUrl: "https://cdn.roblox.com/assets/animations/cry.mp4"
+                }
+            };
+            
+            // Обработчики для кнопок воспроизведения
+            playButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const animationType = this.getAttribute('data-animation');
+                    const animation = animations[animationType];
+                    
+                    modalTitle.textContent = animation.title;
+                    animationDescription.textContent = animation.description;
+                    
+                    // Вставка видео
+                    animationPlayer.innerHTML = `
+                        <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:#000; border-radius:12px;">
+                            <div style="text-align:center; color:white; padding:2rem;">
+                                <div style="font-size:3rem; margin-bottom:1rem; color:#8a2be2;"><i class="fas fa-lock"></i></div>
+                                <h3 style="margin-bottom:1rem;">Доступ только для зарегистрированных пользователей</h3>
+                                <p style="margin-bottom:1.5rem; color:#b0b0d0;">Для просмотра анимации необходима регистрация через Roblox</p>
+                                <button class="auth-btn" style="margin-top:1rem; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.15);" id="modalRegisterBtn">
+                                    <i class="fab fa-roblox"></i> Зарегистрироваться
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Добавляем обработчик для кнопки регистрации в модальном окне
+                    document.getElementById('modalRegisterBtn').addEventListener('click', function() {
+                        window.location.href = 'https://ваш-сайт-регистрации.ru';
+                    });
+                    
+                    modal.classList.add('active');
+                });
+            });
+            
+            // Закрытие модального окна
+            closeModalBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+            
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            
+            // Обработчики для кнопок регистрации
+            registerButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Перенаправление на страницу регистрации
+                    window.location.href = 'https://ваш-сайт-регистрации.ru';
+                });
+            });
+            
+            // Функция создания анимированного фона
+            function createAnimatedBackground() {
+                const bgAnimation = document.getElementById('bgAnimation');
+                const colors = ['#8a2be2', '#4B0082', '#483D8B', '#2F4F4F'];
+                
+                for (let i = 0; i < 20; i++) {
+                    const circle = document.createElement('div');
+                    circle.classList.add('bg-circle');
+                    
+                    // Случайный размер
+                    const size = Math.random() * 300 + 100;
+                    circle.style.width = `${size}px`;
+                    circle.style.height = `${size}px`;
+                    
+                    // Случайная позиция
+                    circle.style.left = `${Math.random() * 100}%`;
+                    circle.style.top = `${Math.random() * 100}%`;
+                    
+                    // Случайный цвет
+                    circle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]} 0%, transparent 70%)`;
+                    
+                    // Анимация движения
+                    circle.style.animation = `moveAround ${Math.random() * 30 + 20}s infinite alternate linear`;
+                    
+                    bgAnimation.appendChild(circle);
+                }
+                
+                // Добавляем keyframes для анимации движения
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes moveAround {
+                        0% {
+                            transform: translate(0, 0);
+                        }
+                        25% {
+                            transform: translate(${Math.random() * 50}px, ${Math.random() * 50}px);
+                        }
+                        50% {
+                            transform: translate(${Math.random() * 100}px, ${Math.random() * 30}px);
+                        }
+                        75% {
+                            transform: translate(${Math.random() * 30}px, ${Math.random() * 100}px);
+                        }
+                        100% {
+                            transform: translate(${Math.random() * 80}px, ${Math.random() * 80}px);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
+</body>
+</html>
