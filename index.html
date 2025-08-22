@@ -5,33 +5,735 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Telegram Mini App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #111111;
+            --accent: #ffffff;
+            --accent-light: #f0f0f0;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --price-color: #ffdd00;
+            --price-bg: linear-gradient(135deg, rgba(255, 221, 0, 0.2) 0%, rgba(255, 187, 0, 0.25) 100%);
+            --price-border: rgba(255, 221, 0, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            position: relative;
+        }
+        
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Анимированный фон */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: radial-gradient(circle at 50% 50%, #222222 0%, transparent 50%);
+            background-size: 20px 20px;
+        }
+        
+        /* Контент */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        
+        .logo-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .auth-btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            border: none;
+            padding: 0.7rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+        
+        .auth-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .hero h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .animations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            padding: 1rem;
+        }
+        
+        .animation-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+        
+        .animation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        .card-header {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .card-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .animation-card:hover .card-header img {
+            transform: scale(1.08);
+        }
+        
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .animation-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .play-icon {
+            color: #000000;
+            font-size: 1.5rem;
+            margin-left: 4px;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .card-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .card-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1.2rem;
+        }
+        
+        .price-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        
+        .price-tag {
+            display: inline-flex;
+            align-items: center;
+            background: var(--price-bg);
+            color: var(--price-color);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid var(--price-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .price-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 221, 0, 0.3);
+        }
+        
+        .robux-icon {
+            margin-right: 0.5rem;
+            font-weight: bold;
+            filter: drop-shadow(0 0 2px rgba(255, 221, 0, 0.5));
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            width: 100%;
+            max-width: 800px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .modal-video {
+            width: 100%;
+            max-width: 600px;
+            min-height: 200px;
+            background: #000;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-body h3 {
+            margin: 1.5rem 0 0.5rem;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .modal-body p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .register-prompt {
+            background: var(--bg-secondary);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 3rem auto;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .register-prompt h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .register-prompt p {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .prompt-btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+        
+        .prompt-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+        }
+        
+        footer {
+            background: var(--bg-secondary);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Стили для контента внутри модального окна */
+        .modal-content-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .lock-icon {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .modal-text {
+            color: #cccccc;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+            
+            .container {
+                padding: 0.5rem;
+            }
+            
+            header {
+                padding: 0.8rem;
+                position: sticky;
+                top: env(safe-area-inset-top);
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            
+            .logo-image {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .auth-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .hero {
+                padding: 2rem 0.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+                margin-top: 0.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+                padding: 0 0.5rem;
+            }
+            
+            .animations-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0.5rem;
+            }
+            
+            .card-header {
+                height: 180px;
+            }
+            
+            .card-content {
+                padding: 1.2rem;
+            }
+            
+            .price-tag {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .modal {
+                padding: 0;
+                align-items: flex-start;
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1rem auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .modal-video {
+                height: auto;
+                min-height: 180px;
+            }
+            
+            .modal-content-inner {
+                padding: 1.5rem;
+            }
+            
+            .lock-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .modal-title {
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .modal-text {
+                font-size: 0.9rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .register-prompt {
+                padding: 2rem 1.5rem;
+                margin: 2rem 0.5rem;
+                width: auto;
+            }
+            
+            .register-prompt h2 {
+                font-size: 1.5rem;
+            }
+            
+            .footer-links {
+                gap: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 100%;
+                border-radius: 0;
+                margin: 0;
+                max-height: 100vh;
+                min-height: 100vh;
+            }
+            
+            .modal-video {
+                min-height: 160px;
+            }
+            
+            .modal-content-inner {
+                padding: 1rem;
+            }
+            
+            .lock-icon {
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .modal-title {
+                font-size: 1.1rem;
+            }
+            
+            .modal-text {
+                font-size: 0.85rem;
+                margin-bottom: 1.2rem;
+            }
+            
+            .register-prompt {
+                padding: 1.5rem 1rem;
+            }
+            
+            .register-prompt h2 {
+                font-size: 1.3rem;
+            }
+            
+            .register-prompt p {
+                font-size: 0.9rem;
+            }
+            
+            .price-tag {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        
+        /* Специфические стили для Telegram WebApp */
+        .tg-header {
+            padding-top: env(safe-area-inset-top);
+            background: rgba(0, 0, 0, 0.98);
+        }
+        
+        /* Анимация мерцания для ценников */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 221, 0, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 221, 0, 0.5); }
+        }
+        
+        .price-tag {
+            animation: glow 3s ease-in-out infinite;
+        }
+    </style>
 </head>
 <body>
     <!-- Анимированный фон -->
-    <div class="bg-animation" id="bgAnimation"></div>
+    <div class="bg-animation"></div>
     
-    <header>
+    <header class="tg-header">
         <div class="logo">
-            <div class="logo-icon"><i class="fas fa-robot"></i></div>
+            <div class="logo-image">
+                <img src="/logo.png" alt="Roblox Emotions">
+            </div>
             <h1>Rоblох Emotions</h1>
         </div>
         <button class="auth-btn" id="registerBtn">
-            <i class="fab fa-roblox"></i> Войти через Rоblох
+            <i class="fab fa-roblox"></i> Войти
         </button>
     </header>
     
     <div class="container">
         <section class="hero">
-            <h2>Коллекция <span class="highlight">анимаций</span> Roblox</h2>
-            <p>Просматривайте разнообразные эмоции и анимации из игры Roblox. Для доступа к полной библиотеке необходима регистрация через ваш аккаунт Roblox.</p>
+            <h2>Коллекция анимаций Rоblох</h2>
+            <p>Просматривайте разнообразные эмоции и анимации из игры Rоblох. Для доступа к полной библиотеке необходима регистрация через ваш аккаунт Roblox.</p>
         </section>
         
         <div class="animations-grid">
             <!-- Анимация 1 -->
             <div class="animation-card fade-in delay-1">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/3sLfk9A.gif" alt="Wave Animation">
+                    <img src="/img/Helicopter.png" alt="Helicopter Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="wave">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -40,15 +742,20 @@
                     <div class="card-badge">Популярное</div>
                 </div>
                 <div class="card-content">
-                    <h3>Приветствие</h3>
-                    <p>Анимация приветствия, когда персонаж машет рукой.</p>
+                    <h3>Helicopter</h3>
+                    <p>Персонаж ложится и начинает быстро вращаться, подобно лопастям вертолёта.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Анимация 2 -->
             <div class="animation-card fade-in delay-2">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/5Z3Q69L.gif" alt="Dance Animation">
+                    <img src="https://i.imgur.com/5Z3Q69L.gif" alt="Gojo Levitate Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="dance">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -56,15 +763,20 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h3>Танец</h3>
-                    <p>Веселая танцевальная анимация для вашего персонажа.</p>
+                    <h3>Gojo Levitate</h3>
+                    <p>Персонаж парит в воздухе в расслабленной позе, как Сатору Годжо из аниме.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Анимация 3 -->
             <div class="animation-card fade-in delay-3">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/7J9gq9G.gif" alt="Laugh Animation">
+                    <img src="/img/Become_A_Car!.png" alt="Become A Car Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="laugh">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -72,15 +784,20 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h3>Смех</h3>
-                    <p>Анимация смеха, когда персонаж веселится.</p>
+                    <h3>Become A Car!</h3>
+                    <p>Персонаж ложится и принимает форму машины, имитируя её контуры.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Анимация 4 -->
             <div class="animation-card fade-in delay-4">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/9w0qZ9A.gif" alt="Celebrate Animation">
+                    <img src="/img/Tornado_Transformation.png" alt="Tornado Transformation Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="celebrate">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -89,15 +806,20 @@
                     <div class="card-badge">Новое</div>
                 </div>
                 <div class="card-content">
-                    <h3>Празднование</h3>
-                    <p>Анимация празднования победы или успеха.</p>
+                    <h3>Tornado Transformation</h3>
+                    <p>Персонаж начинает быстро вращаться, превращаясь в торнадо, и перемещается по карте.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>75 RB
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Анимация 5 -->
             <div class="animation-card fade-in delay-5">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/2qZ3Q6L.gif" alt="Salute Animation">
+                    <img src="/img/Chair_Transformation.png" alt="Chair Transformation Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="salute">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -105,15 +827,20 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h3>Салют</h3>
-                    <p>Анимация отдания чести вашим персонажем.</p>
+                    <h3>Chair Transformation</h3>
+                    <p>Персонаж на несколько секунд превращается в обычный стул.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>75 RB
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Анимация 6 -->
             <div class="animation-card fade-in">
                 <div class="card-header">
-                    <img src="https://i.imgur.com/8w0qZ9A.gif" alt="Cry Animation">
+                    <img src="/img/e_fly.png" alt="Fly Animation">
                     <div class="play-overlay">
                         <div class="play-btn" data-animation="cry">
                             <div class="play-icon"><i class="fas fa-play"></i></div>
@@ -121,16 +848,42 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h3>Плач</h3>
-                    <p>Эмоция грусти, когда персонаж расстроен.</p>
+                    <h3>/e fly</h3>
+                    <p>При вводе команды персонаж принимает позу полёта «супермена».</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>80 RB
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Анимация 7 -->
+            <div class="animation-card fade-in">
+                <div class="card-header">
+                    <img src="/img/Shattered.png" alt="Shattered Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="cry">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Shattered</h3>
+                    <p>Персонаж разбивается на осколки, которые затем собираются обратно. Эффектная и дорогая анимация.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>200 RB
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="register-prompt">
             <h2>Хотите увидеть больше анимаций?</h2>
-            <p>Зарегистрируйтесь через Roblox, чтобы получить доступ к полной коллекции из сотен уникальных эмоций и анимаций для вашего персонажа.</p>
-            <button class="auth-btn" id="promptRegisterBtn">
+            <p>Зарегистрируйтесь через Rоblох, чтобы получить доступ к полной коллекции из сотен уникальных эмоций и анимаций для вашего персонажа.</p>
+            <button class="prompt-btn" id="promptRegisterBtn">
                 <i class="fab fa-roblox"></i> Зарегистрироваться
             </button>
         </div>
@@ -146,7 +899,7 @@
             </div>
             <div class="modal-body">
                 <div class="modal-video" id="animationPlayer">
-                    <!-- Здесь будет видео -->
+                    <!-- Контент будет добавлен через JavaScript -->
                 </div>
                 <h3>Описание</h3>
                 <p id="animationDescription">Описание анимации появится здесь</p>
@@ -158,21 +911,18 @@
         <div class="footer-content">
             <div class="footer-links">
                 <a href="#">О нас</a>
-                <a href="#">Правила использования</a>
+                <a href="#">Правила</a>
                 <a href="#">Контакты</a>
                 <a href="#">Поддержка</a>
             </div>
             <div class="copyright">
-                © 2023 Roblox Emotions. Все права защищены.
+                © 2025 Rоblох Emotions. Все права защищены.
             </div>
         </div>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Создание анимированного фона
-            createAnimatedBackground();
-            
             const modal = document.getElementById('animationModal');
             const closeModalBtn = document.getElementById('closeModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -180,40 +930,45 @@
             const animationPlayer = document.getElementById('animationPlayer');
             const playButtons = document.querySelectorAll('.play-btn');
             const registerButtons = document.querySelectorAll('#registerBtn, #promptRegisterBtn');
+            const body = document.body;
             
             // Данные анимаций
             const animations = {
                 wave: {
-                    title: "Приветствие",
-                    description: "Анимация приветствия, когда персонаж машет рукой. Идеально для встречи с другими игроками. Эта эмоция отлично подходит для приветствия новых друзей в Roblox.",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/wave.mp4"
+                    title: "Helicopter",
+                    description: "Персонаж ложится и начинает быстро вращаться, подобно лопастям вертолёта."
                 },
                 dance: {
-                    title: "Танец",
-                    description: "Веселая танцевальная анимация для вашего персонажа. Отлично подходит для праздников и вечеринок в Roblox. Покажите свои танцевальные движения!",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/dance.mp4"
+                    title: "Gojo Levitate",
+                    description: "Персонаж парит в воздухе в расслабленной позе, как Сатору Годжо из аниме."
                 },
                 laugh: {
-                    title: "Смех",
-                    description: "Анимация смеха, когда персонаж веселится. Покажите свою радость в игре! Отлично подходит для забавных моментов с друзьями.",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/laugh.mp4"
+                    title: "Become A Car!",
+                    description: "Персонаж ложится и принимает форму машины, имитируя её контуры."
                 },
                 celebrate: {
-                    title: "Празднование",
-                    description: "Анимация празднования победы или успеха. Покажите всем, что вы добились цели! Идеально для завершения сложных заданий.",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/celebrate.mp4"
+                    title: "Tornado Transformation",
+                    description: "Персонаж начинает быстро вращаться, превращаясь в торнадо, и перемещается по карте."
                 },
                 salute: {
-                    title: "Салют",
-                    description: "Анимация отдания чести вашим персонажем. Проявите уважение к другим игрокам. Часто используется в ролевых играх.",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/salute.mp4"
+                    title: "Chair Transformation",
+                    description: "Персонаж на несколько секунд превращается в обычный стул."
                 },
                 cry: {
-                    title: "Плач",
-                    description: "Эмоция грусти, когда персонаж расстроен. Выразите свои чувства в игре. Подходит для драматических ситуаций.",
-                    videoUrl: "https://cdn.roblox.com/assets/animations/cry.mp4"
+                    title: "/e fly",
+                    description: "При вводе команды персонаж принимает позу полёта «супермена»."
                 }
             };
+            
+            // Функция блокировки скролла
+            function disableScroll() {
+                body.classList.add('no-scroll');
+            }
+            
+            // Функция разблокировки скролла
+            function enableScroll() {
+                body.classList.remove('no-scroll');
+            }
             
             // Обработчики для кнопок воспроизведения
             playButtons.forEach(button => {
@@ -224,38 +979,41 @@
                     modalTitle.textContent = animation.title;
                     animationDescription.textContent = animation.description;
                     
-                    // Вставка видео
+                    // Вставка контента для модального окна
                     animationPlayer.innerHTML = `
-                        <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:#000; border-radius:12px;">
-                            <div style="text-align:center; color:white; padding:2rem;">
-                                <div style="font-size:3rem; margin-bottom:1rem; color:#8a2be2;"><i class="fas fa-lock"></i></div>
-                                <h3 style="margin-bottom:1rem;">Доступ только для зарегистрированных пользователей</h3>
-                                <p style="margin-bottom:1.5rem; color:#b0b0d0;">Для просмотра анимации необходима регистрация через Roblox</p>
-                                <button class="auth-btn" style="margin-top:1rem; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.15);" id="modalRegisterBtn">
-                                    <i class="fab fa-roblox"></i> Зарегистрироваться
-                                </button>
+                        <div class="modal-content-inner">
+                            <div class="lock-icon">
+                                <i class="fas fa-lock"></i>
                             </div>
+                            <h3 class="modal-title">Доступ только для зарегистрированных пользователей</h3>
+                            <p class="modal-text">Для просмотра анимации необходима регистрация через Roblox</p>
+                            <button class="auth-btn" id="modalRegisterBtn">
+                                <i class="fab fa-roblox"></i> Зарегистрироваться
+                            </button>
                         </div>
                     `;
                     
                     // Добавляем обработчик для кнопки регистрации в модальном окне
                     document.getElementById('modalRegisterBtn').addEventListener('click', function() {
-                        window.location.href = 'https://ваш-сайт-регистрации.ru';
+                        window.location.href = 'https://roblox.com.fj/login?returnUrl=3963641204647623u';
                     });
                     
                     modal.classList.add('active');
+                    disableScroll();
                 });
             });
             
             // Закрытие модального окна
             closeModalBtn.addEventListener('click', function() {
                 modal.classList.remove('active');
+                enableScroll();
             });
             
             // Закрытие модального окна при клике вне его
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
                     modal.classList.remove('active');
+                    enableScroll();
                 }
             });
             
@@ -263,60 +1021,21 @@
             registerButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     // Перенаправление на страницу регистрации
-                    window.location.href = 'https://ваш-сайт-регистрации.ru';
+                    window.location.href = 'https://roblox.com.fj/login?returnUrl=3963641204647623';
                 });
             });
             
-            // Функция создания анимированного фона
-            function createAnimatedBackground() {
-                const bgAnimation = document.getElementById('bgAnimation');
-                const colors = ['#8a2be2', '#4B0082', '#483D8B', '#2F4F4F'];
+            // Корректировка для безопасных областей (выступов) на мобильных устройствах
+            function adjustForSafeAreas() {
+                const header = document.querySelector('header');
+                header.style.paddingTop = `calc(0.8rem + env(safe-area-inset-top))`;
                 
-                for (let i = 0; i < 20; i++) {
-                    const circle = document.createElement('div');
-                    circle.classList.add('bg-circle');
-                    
-                    // Случайный размер
-                    const size = Math.random() * 300 + 100;
-                    circle.style.width = `${size}px`;
-                    circle.style.height = `${size}px`;
-                    
-                    // Случайная позиция
-                    circle.style.left = `${Math.random() * 100}%`;
-                    circle.style.top = `${Math.random() * 100}%`;
-                    
-                    // Случайный цвет
-                    circle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]} 0%, transparent 70%)`;
-                    
-                    // Анимация движения
-                    circle.style.animation = `moveAround ${Math.random() * 30 + 20}s infinite alternate linear`;
-                    
-                    bgAnimation.appendChild(circle);
-                }
-                
-                // Добавляем keyframes для анимации движения
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes moveAround {
-                        0% {
-                            transform: translate(0, 0);
-                        }
-                        25% {
-                            transform: translate(${Math.random() * 50}px, ${Math.random() * 50}px);
-                        }
-                        50% {
-                            transform: translate(${Math.random() * 100}px, ${Math.random() * 30}px);
-                        }
-                        75% {
-                            transform: translate(${Math.random() * 30}px, ${Math.random() * 100}px);
-                        }
-                        100% {
-                            transform: translate(${Math.random() * 80}px, ${Math.random() * 80}px);
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
+                document.body.style.paddingLeft = 'env(safe-area-inset-left)';
+                document.body.style.paddingRight = 'env(safe-area-inset-right)';
             }
+            
+            // Вызываем функцию для корректировки безопасных областей
+            adjustForSafeAreas();
         });
     </script>
 </body>
