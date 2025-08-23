@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Telegram Mini App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #111111;
+            --accent: #ffffff;
+            --accent-light: #f0f0f0;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --price-color: #ffdd00;
+            --price-bg: linear-gradient(135deg, rgba(255, 221, 0, 0.2) 0%, rgba(255, 187, 0, 0.25) 100%);
+            --price-border: rgba(255, 221, 0, 0.4);
+            --success-color: #4CAF50;
+            --success-bg: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.25) 100%);
+            --success-border: rgba(76, 175, 80, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            position: relative;
+        }
+        
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Анимированный фон */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: radial-gradient(circle at 50% 50%, #222222 0%, transparent 50%);
+            background-size: 20px 20px;
+        }
+        
+        /* Контент */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        
+        .logo-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .username {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .hero h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .animations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            padding: 1rem;
+        }
+        
+        .animation-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+        
+        .animation-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        .card-header {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .card-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .animation-card:hover .card-header img {
+            transform: scale(1.08);
+        }
+        
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .animation-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .play-icon {
+            color: #000000;
+            font-size: 1.5rem;
+            margin-left: 4px;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .card-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .card-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1.2rem;
+        }
+        
+        .price-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        
+        .price-tag {
+            display: inline-flex;
+            align-items: center;
+            background: var(--price-bg);
+            color: var(--price-color);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid var(--price-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .price-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 221, 0, 0.3);
+        }
+        
+        .get-btn {
+            display: inline-flex;
+            align-items: center;
+            background: var(--success-bg);
+            color: var(--success-color);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid var(--success-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .get-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .robux-icon {
+            margin-right: 0.5rem;
+            font-weight: bold;
+            filter: drop-shadow(0 0 2px rgba(255, 221, 0, 0.5));
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            width: 100%;
+            max-width: 800px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .modal-video {
+            width: 100%;
+            max-width: 600px;
+            min-height: 200px;
+            background: #000;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-body h3 {
+            margin: 1.5rem 0 0.5rem;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .modal-body p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .success-message {
+            background: var(--success-bg);
+            color: var(--success-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--success-border);
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            background: var(--bg-secondary);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        
+        /* Специфические стили для Telegram WebApp */
+        .tg-header {
+            padding-top: env(safe-area-inset-top);
+            background: rgba(0, 0, 0, 0.98);
+        }
+        
+        /* Анимация мерцания для ценников */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 221, 0, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 221, 0, 0.5); }
+        }
+        
+        .price-tag {
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+            
+            .container {
+                padding: 0.5rem;
+            }
+            
+            header {
+                padding: 0.8rem;
+                position: sticky;
+                top: env(safe-area-inset-top);
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            
+            .logo-image {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .username {
+                font-size: 0.9rem;
+            }
+            
+            .hero {
+                padding: 2rem 0.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+                margin-top: 0.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+                padding: 0 0.5rem;
+            }
+            
+            .animations-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0.5rem;
+            }
+            
+            .card-header {
+                height: 180px;
+            }
+            
+            .card-content {
+                padding: 1.2rem;
+            }
+            
+            .price-tag, .get-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .modal {
+                padding: 0;
+                align-items: flex-start;
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1rem auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .modal-video {
+                height: auto;
+                min-height: 180px;
+            }
+            
+            .success-message {
+                padding: 1rem;
+            }
+            
+            .success-icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 100%;
+                border-radius: 0;
+                margin: 0;
+                max-height: 100vh;
+                min-height: 100vh;
+            }
+            
+            .modal-video {
+                min-height: 160px;
+            }
+            
+            .username {
+                display: none;
+            }
+            
+            .success-message {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .success-icon {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированный фон -->
+    <div class="bg-animation"></div>
+    
+    <header class="tg-header">
+        <div class="logo">
+            <div class="logo-image">
+                <img src="/web/img/logo.PNG" alt="Roblox Emotions">
+            </div>
+            <h1>Rоblох Emotions</h1>
+        </div>
+        <div class="user-profile">
+            <span class="username">AnimationsHub</span>
+            <div class="user-avatar">
+                <img src="/avatar.PNG" alt="User Avatar">
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section class="hero">
+            <h2>Коллекция анимаций Rоblох</h2>
+            <p>Просматривайте разнообразные эмоции и анимации из игры Rоblох. Нажмите "Получить", чтобы добавить анимацию в свой аккаунт.</p>
+        </section>
+        
+        <div class="animations-grid">
+            <!-- Анимация 1 -->
+            <div class="animation-card fade-in delay-1">
+                <div class="card-header">
+                    <img src="/web/img/Helicopter.PNG" alt="Helicopter Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="wave">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                    <div class="card-badge">Популярное</div>
+                </div>
+                <div class="card-content">
+                    <h3>Helicopter</h3>
+                    <p>Персонаж ложится и начинает быстро вращаться, подобно лопастям вертолёта.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                        <button class="get-btn" data-animation="wave">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Анимация 2 -->
+            <div class="animation-card fade-in delay-2">
+                <div class="card-header">
+                    <img src="/web/img/Gojo_Levitate.PNG" alt="Gojo Levitate Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="dance">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Gojo Levitate</h3>
+                    <p>Персонаж парит в воздухе в расслабленной позе, как Сатору Годжо из аниме.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                        <button class="get-btn" data-animation="dance">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Анимация 3 -->
+            <div class="animation-card fade-in delay-3">
+                <div class="card-header">
+                    <img src="/web/img/Become_A_Car!.PNG" alt="Become A Car Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="laugh">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Become A Car!</h3>
+                    <p>Персонаж ложится и принимает форму машины, имитируя её контуры.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>50 RB
+                        </div>
+                        <button class="get-btn" data-animation="laugh">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Анимация 4 -->
+            <div class="animation-card fade-in delay-4">
+                <div class="card-header">
+                    <img src="/web/img/Tornado_Transformation.PNG" alt="Tornado Transformation Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="celebrate">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                    <div class="card-badge">Новое</div>
+                </div>
+                <div class="card-content">
+                    <h3>Tornado Transformation</h3>
+                    <p>Персонаж начинает быстро вращаться, превращаясь в торнадо, и перемещается по карте.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>75 RB
+                        </div>
+                        <button class="get-btn" data-animation="celebrate">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Анимация 5 -->
+            <div class="animation-card fade-in delay-5">
+                <div class="card-header">
+                    <img src="/web/img/Chair_Transformation.PNG" alt="Chair Transformation Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="salute">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Chair Transformation</h3>
+                    <p>Персонаж на несколько секунд превращается в обычный стул.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>75 RB
+                        </div>
+                        <button class="get-btn" data-animation="salute">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Анимация 6 -->
+            <div class="animation-card fade-in">
+                <div class="card-header">
+                    <img src="/web/img/e_fly.PNG" alt="Fly Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="cry">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>/e fly</h3>
+                    <p>При вводе команды персонаж принимает позу полёта «супермена».</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>80 RB
+                        </div>
+                        <button class="get-btn" data-animation="cry">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Анимация 7 -->
+            <div class="animation-card fade-in">
+                <div class="card-header">
+                    <img src="/web/img/Shattered.PNG" alt="Shattered Animation">
+                    <div class="play-overlay">
+                        <div class="play-btn" data-animation="shattered">
+                            <div class="play-icon"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Shattered</h3>
+                    <p>Персонаж разбивается на осколки, которые затем собираются обратно. Эффектная и дорогая анимация.</p>
+                    <div class="price-container">
+                        <div class="price-tag">
+                            <span class="robux-icon">®</span>200 RB
+                        </div>
+                        <button class="get-btn" data-animation="shattered">
+                            <i class="fas fa-download"></i> Получить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="animationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Название анимации</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-video" id="animationPlayer">
+                    <!-- Контент будет добавлен через JavaScript -->
+                </div>
+                <h3>Описание</h3>
+                <p id="animationDescription">Описание анимации появится здесь</p>
+                
+                <div class="success-message" id="successMessage">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Анимация успешно получена!</h3>
+                    <p>Эмоция будет доступна в вашем аккаунте в течение 24 часов. Спасибо за использование нашего сервиса!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://t.me/AnimationsHub_bot?start=test">О нас</a>
+                <a href="#">Правила</a>
+                <a href="#">Контакты</a>
+                <a href="#">Поддержка</a>
+            </div>
+            <div class="copyright">
+                © 2025 Rоblох Emotions. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('animationModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const animationDescription = document.getElementById('animationDescription');
+            const animationPlayer = document.getElementById('animationPlayer');
+            const successMessage = document.getElementById('successMessage');
+            const playButtons = document.querySelectorAll('.play-btn');
+            const getButtons = document.querySelectorAll('.get-btn');
+            const body = document.body;
+            
+            // Скрываем сообщение об успехе по умолчанию
+            successMessage.style.display = 'none';
+            
+            // Данные анимаций
+            const animations = {
+                wave: {
+                    title: "Helicopter",
+                    description: "Персонаж ложится и начинает быстро вращаться, подобно лопастям вертолёта.",
+                    video: "/web/Videos/helicopter.mp4"
+                },
+                dance: {
+                    title: "Gojo Levitate",
+                    description: "Персонаж парит в воздухе в расслабленной позе, как Сатору Годжо из аниме.",
+                    video: "/web/Videos/gojo.mp4"
+                },
+                laugh: {
+                    title: "Become A Car!",
+                    description: "Персонаж ложится и принимает форму машины, имитируя её контуры.",
+                    video: "/web/Videos/car.mp4"
+                },
+                celebrate: {
+                    title: "Tornado Transformation",
+                    description: "Персонаж начинает быстро вращаться, превращаясь в торнадо, и перемещается по карте.",
+                    video: "/web/Videos/tornado.mp4"
+                },
+                salute: {
+                    title: "Chair Transformation",
+                    description: "Персонаж на несколько секунд превращается в обычный стул.",
+                    video: "/web/Videos/chair.mp4"
+                },
+                cry: {
+                    title: "/e fly",
+                    description: "При вводе команды персонаж принимает позу полёта «супермена».",
+                    video: "/web/Videos/fly.mp4"
+                },
+                shattered: {
+                    title: "Shattered",
+                    description: "Персонаж разбивается на осколки, которые затем собираются обратно. Эффектная и дорогая анимация.",
+                    video: "/web/Videos/shattered.mp4"
+                }
+            };
+            
+            // Функция блокировки скролла
+            function disableScroll() {
+                body.classList.add('no-scroll');
+            }
+            
+            // Функция разблокировки скролла
+            function enableScroll() {
+                body.classList.remove('no-scroll');
+            }
+            
+            // Обработчики для кнопок воспроизведения
+            playButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const animationType = this.getAttribute('data-animation');
+                    const animation = animations[animationType];
+                    
+                    modalTitle.textContent = animation.title;
+                    animationDescription.textContent = animation.description;
+                    
+                    // Вставка видео для модального окна
+                    animationPlayer.innerHTML = `
+                        <video autoplay muted loop controls>
+                            <source src="${animation.video}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                    
+                    // Скрываем сообщение об успехе при просмотре
+                    successMessage.style.display = 'none';
+                    
+                    modal.classList.add('active');
+                    disableScroll();
+                });
+            });
+            
+            // Обработчики для кнопок получения
+            getButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const animationType = this.getAttribute('data-animation');
+                    const animation = animations[animationType];
+                    
+                    modalTitle.textContent = animation.title;
+                    animationDescription.textContent = animation.description;
+                    
+                    // Вставка видео для модального окна
+                    animationPlayer.innerHTML = `
+                        <video autoplay muted loop controls>
+                            <source src="${animation.video}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                    
+                    // Показываем сообщение об успехе
+                    successMessage.style.display = 'block';
+                    
+                    modal.classList.add('active');
+                    disableScroll();
+                });
+            });
+            
+            // Закрытие модального окна
+            closeModalBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+                enableScroll();
+                
+                // Останавливаем видео при закрытии модального окна
+                const video = animationPlayer.querySelector('video');
+                if (video) {
+                    video.pause();
+                }
+            });
+            
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                    enableScroll();
+                    
+                    // Останавливаем видео при закрытии модального окна
+                    const video = animationPlayer.querySelector('video');
+                    if (video) {
+                        video.pause();
+                    }
+                }
+            });
+            
+            // Корректировка для безопасных областей (выступов) на мобильных устройствах
+            function adjustForSafeAreas() {
+                const header = document.querySelector('header');
+                header.style.paddingTop = `calc(0.8rem + env(safe-area-inset-top))`;
+                
+                document.body.style.paddingLeft = 'env(safe-area-inset-left)';
+                document.body.style.paddingRight = 'env(safe-area-inset-right)';
+            }
+            
+            // Вызываем функцию для корректировки безопасных областей
+            adjustForSafeAreas();
+        });
+    </script>
+</body>
+</html>
